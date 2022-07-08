@@ -1,19 +1,12 @@
 import random
 import requests
-## importing socket module
-import socket
-## getting the hostname by socket.gethostname() method
-hostname = socket.gethostname()
-## getting the IP address using socket.gethostbyname() method
-IP_ADDRESS = socket.gethostbyname(hostname)
-PORT = ":8000"
 
 ALLOWED_TABLES = lambda : random.randint(1, 300)
 
 
 def test_order_table(attempts = 30):
     method = "/table_order/"
-    url = "http://192.168.254.137:8000/table_order/"
+    url = "http://127.0.0.1:8000/table_order/"
     print(url)
     #Testing good requests
     RESPONSES_200 = list()
