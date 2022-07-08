@@ -1,36 +1,39 @@
-from typing import Union
-from fastapi import FastAPI, Response, status
-from pydantic import BaseModel
+#Fast API libraries
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from fastapi_utils.tasks import repeat_every
+
+#Request model defenitions
+from models import TableOrder, TableOrderResponse
+
+#Annotation libraries
+from pydantic import BaseModel
+from typing import Union
+
+#Builting libraries
 import requests
 import os
-import time
-import queue
 import asyncio
-import aiohttp
 
-Q = queue.Queue()
+#Config file
+from settings import *
 
-OPERATION_OPTIONS = None
-
-SUCCESS_OPERATION = 'paid'
-
-RADIO_ATTEMPS = 3
-
-RADIO_REQUEST = "rpi-rf_send -g 27 -p 332 -t 1 1{table_digits}111"
-
-class TableOrder(BaseModel):
-    operation: Union[str, None] = None
-    table: Union[int, None] = None
-    waiter: Union[int, None] = None
 
 app = FastAPI()
 
-@app.post("/table_order/", status_code=200)
-async def create_item(item: TableOrder):
-    context = {
-        "status": "Failure"
+@app.post("/table_order/", 
+    status_code=200, 
+    response_model=TableOrderResponse,
+    responses={
+        400: {"model": TableOrderResponse},
+        200: {"model": TableOrderResponse},
+        422: {"model": TableOrderResponse},   
     }
+)
+async def create_item(item: TableOrder) -> JSONResponse:
+    """
+        The function creates script for radio request and puts it into RADIO_SIGNALS_QUEUE
+    """
     if item.operation == SUCCESS_OPERATION and item.table is not None:
         table_number = str(item.table)[::-1]
         table_digits = ["0"] * 3
@@ -42,38 +45,30 @@ async def create_item(item: TableOrder):
             radio_request = RADIO_REQUEST.format(table_digits=table_digits)
 
             for i in range(RADIO_ATTEMPS):
-                Q.put(radio_request)
+                RADIO_SIGNALS_QUEUE.put(radio_request)
 
-            context["status"] = "Success"
-            return context
+            return JSONResponse(status_code=200, content={"message": "Success"})
 
-    # response.status_code = status.HTTP_201_CREATED
-    return context
-
-
+    return JSONResponse(status_code=400, content={"message": "Bad request"})
 
 
 @app.on_event("startup")
-@repeat_every(seconds=2)  # 1 hour
+@repeat_every(seconds=2)
 async def send_signal() -> None:
     await asyncio.sleep(1)
-    if not Q.empty():
-        elem = Q.get()
+    if not RADIO_SIGNALS_QUEUE.empty():
+        elem = RADIO_SIGNALS_QUEUE.get()
         resp = os.popen(elem).read()
-        print(resp)
-
-    else:
-        print("Q is empty")
 
 
 @app.on_event("startup")
 @repeat_every(seconds=60*3)
 async def get_site() -> None:
-    
     loop = asyncio.get_event_loop()
     future = loop.run_in_executor(None, requests.get, 'http://www.google.com')
     response = await future
     print(response.status_code)
+
 
 if __name__ == "__main__":
     import uvicorn
