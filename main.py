@@ -77,24 +77,6 @@ async def create_item(item: TableOrder, background_tasks: BackgroundTasks) -> JS
 
     return JSONResponse(status_code=200, content={"message": "Success", "code": table_digits})
 
-    
-# @app.on_event("startup")
-# @repeat_every(seconds=2)
-# async def send_signal() -> None:
-#     await asyncio.sleep(1)
-#     if not RADIO_SIGNALS_QUEUE.empty():
-#         elem = RADIO_SIGNALS_QUEUE.get()
-#         resp = os.popen(elem).read()
-
-
-# @app.on_event("startup")
-# @repeat_every(seconds=60*3)
-# async def get_site() -> None:
-#     loop = asyncio.get_event_loop()
-#     future = loop.run_in_executor(None, requests.get, 'http://www.google.com')
-#     response = await future
-#     print(response.status_code)
-
 
 if __name__ == "__main__":
     import uvicorn
