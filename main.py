@@ -66,8 +66,11 @@ async def create_item(item: TableOrder, background_tasks: BackgroundTasks) -> JS
     """
         The function creates script for radio request and puts it into RADIO_SIGNALS_QUEUE
     """
+
+    code_valid = len(str(item.table)) >= 1 and len(str(item.table)) < 3
+
     if item.operation not in (OperationEnum.PAID, OperationEnum.ORDER) \
-        or item.table is None or len(str(item.table)) != 2:
+        or item.table is None or not code_valid:
         return JSONResponse(status_code=400, content={"message": "Bad request"})
  
     table_digits = format_table_number(item.operation, item.table)
