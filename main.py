@@ -33,7 +33,7 @@ from logging.handlers import RotatingFileHandler
 
 
 handler = RotatingFileHandler(
-    'app.log',                  # The log file to write to
+    LOG_PATH,                   # The log file to write to
     maxBytes=5*1024*1024,       # Maximum file size before rotation (5MB in this case)
     backupCount=3               # Keep 3 backup old log files (older ones will be deleted)
 )
@@ -46,6 +46,7 @@ logger.setLevel(logging.INFO)
 
 def send_signal(radio) -> None:
     for _ in range(RADIO_ATTEMPS):
+        logger.info(f"Radio request : {radio}")
         resp = os.popen(radio).read()
         logger.info(f"Radio response : {resp}")
 
