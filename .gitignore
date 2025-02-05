@@ -2,3 +2,6 @@ __pycache__/
 env/
 
 *.log
+*.logs
+
+dev_settings.py
