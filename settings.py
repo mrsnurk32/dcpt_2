@@ -1,18 +1,7 @@
 import queue
 import logging
 
-try:
-    import dev_settings
-    DEBUG = getattr(dev_settings, "DEBUG", False)
-
-except ImportError as err:
-    DEBUG = False
-    logging.info(f"dev_settings not found: {err}")
-
-except Exception as err:
-    DEBUG = False
-    logging.error(f"Unexpected error in settings import: {err}")
-
+DEBUG=True
 
 RADIO_SIGNALS_QUEUE = queue.Queue()
 
