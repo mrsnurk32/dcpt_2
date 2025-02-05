@@ -17,6 +17,7 @@ psutil==5.9.8
 pydantic==2.10.6
 pydantic_core==2.27.2
 pytest==8.3.4
+python-dotenv==1.0.1
 requests==2.32.3
 sniffio==1.2.0
 SQLAlchemy==1.4.39
